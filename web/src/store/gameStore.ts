@@ -122,7 +122,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           set({ yourIndex: msg.player_index });
           break;
         case "StateUpdate":
-          set({
+          set((state) => ({
             phase: msg.phase,
             players: msg.players,
             yourIndex: msg.your_index,
@@ -131,7 +131,17 @@ export const useGameStore = create<GameState>((set, get) => ({
             suddenDeath: msg.sudden_death,
             options: msg.options,
             history: msg.history,
-          });
+            // Restaure le placement déjà soumis après une reconnexion
+            // (rechargement de page, coupure réseau) : le serveur le
+            // renvoie car il n'est jamais secret pour son propre auteur.
+            // On ne l'applique que si le client n'a pas déjà une édition
+            // locale en cours, pour ne pas écraser des modifications non
+            // encore soumises.
+            ownPlacement:
+              state.ownPlacement.length === 0 && msg.your_placement
+                ? msg.your_placement
+                : state.ownPlacement,
+          }));
           break;
         case "PlacementRejected":
           set({ violations: msg.violations });

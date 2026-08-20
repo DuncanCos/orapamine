@@ -77,6 +77,7 @@ pub fn state_update_for(game: &Game, viewer: usize) -> ServerMsg {
         sudden_death: game.sudden_death,
         options: game.options.clone(),
         history: game.history.clone(),
+        your_placement: game.secrets.get(viewer).and_then(|s| s.clone()),
     }
 }
 

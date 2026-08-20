@@ -99,6 +99,7 @@ export type ServerMsg =
       sudden_death: boolean;
       options: RoomOptions;
       history: HistoryEntry[];
+      your_placement: PlacedPiece[] | null;
     }
   | { type: "PlacementRejected"; violations: Violation[] }
   | { type: "RandomPlacement"; pieces: PlacedPiece[] }

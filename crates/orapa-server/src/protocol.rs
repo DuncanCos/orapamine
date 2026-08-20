@@ -118,6 +118,13 @@ pub enum ServerMsg {
         sudden_death: bool,
         options: RoomOptions,
         history: Vec<HistoryEntry>,
+        /// La disposition déjà soumise par ce joueur lui-même (jamais
+        /// secrète pour son propre auteur), pour que le client puisse la
+        /// restaurer après un rechargement de page ou une reconnexion —
+        /// sans cela, la partie "reprend" côté serveur mais le joueur se
+        /// retrouve face à une grille vide alors qu'il avait déjà posé ses
+        /// gemmes. `None` tant qu'il n'a rien soumis.
+        your_placement: Option<Vec<PlacedPiece>>,
     },
     PlacementRejected {
         violations: Vec<Violation>,
