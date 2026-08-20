@@ -105,15 +105,51 @@ export function Board({
   const points = showPoints ? boardPoints(w, h) : [];
   const highlightById = new Map((highlightPoints ?? []).map((p) => [p.id, p.role]));
   const pointById = new Map(points.map((pt) => [pt.id, pt]));
-  const centerX = ox + (w * CELL) / 2;
-  const centerY = oy + (h * CELL) / 2;
-
   function pointPos(id: string): { x: number; y: number } | null {
     const pt = pointById.get(id);
     if (!pt) return null;
     const x = pt.side === "left" ? ox - 12 : pt.side === "right" ? ox + w * CELL + 12 : ox + pt.cellX * CELL + CELL / 2;
     const y = pt.side === "top" ? oy - 12 : pt.side === "bottom" ? oy + h * CELL + 12 : oy + pt.cellY * CELL + CELL / 2;
     return { x, y };
+  }
+
+  // Position exacte du bord de la grille (pas du rond du label, en marge)
+  // pour ce point, et direction "vers l'intérieur" à ce bord — sert à
+  // dessiner un trajet qui entre/sort perpendiculairement au bord et
+  // traverse vraiment des cases, plutôt qu'une ligne "à vol d'oiseau" qui
+  // coupe le plateau en diagonale de façon peu naturelle.
+  function edgePosAndDir(id: string): { x: number; y: number; dx: number; dy: number } | null {
+    const pt = pointById.get(id);
+    if (!pt) return null;
+    switch (pt.side) {
+      case "left":
+        return { x: ox, y: oy + pt.cellY * CELL + CELL / 2, dx: 1, dy: 0 };
+      case "right":
+        return { x: ox + w * CELL, y: oy + pt.cellY * CELL + CELL / 2, dx: -1, dy: 0 };
+      case "top":
+        return { x: ox + pt.cellX * CELL + CELL / 2, y: oy, dx: 0, dy: 1 };
+      case "bottom":
+        return { x: ox + pt.cellX * CELL + CELL / 2, y: oy + h * CELL, dx: 0, dy: -1 };
+    }
+  }
+
+  /** Construit les points d'une polyligne qui entre d'une case depuis
+   * `fromId`, puis (si `toId` est un point différent) rejoint en ligne
+   * droite l'entrée symétrique côté `toId`. Si `toId` est absent ou égal à
+   * `fromId` (rebond immédiat, absorption, perte), la polyligne s'arrête
+   * après cette première case — jamais de segment de longueur nulle. */
+  function beamPathPoints(fromId: string, toId: string | null): string | null {
+    const from = edgePosAndDir(fromId);
+    if (!from) return null;
+    const stub = CELL;
+    const fromInner = { x: from.x + from.dx * stub, y: from.y + from.dy * stub };
+    if (!toId || toId === fromId) {
+      return `${from.x},${from.y} ${fromInner.x},${fromInner.y}`;
+    }
+    const to = edgePosAndDir(toId);
+    if (!to) return null;
+    const toInner = { x: to.x + to.dx * stub, y: to.y + to.dy * stub };
+    return `${from.x},${from.y} ${fromInner.x},${fromInner.y} ${toInner.x},${toInner.y} ${to.x},${to.y}`;
   }
 
   // L'onde émphasisée se dessine en dernier (par-dessus les autres).
@@ -217,52 +253,25 @@ export function Board({
         );
       })}
 
-      {/* Trajets des ondes déjà tirées : ligne directe entrée -> sortie,
-          couleur du résultat final, pour ne pas avoir à consulter
-          l'historique. Émphasisée (survol/clic) = plus épaisse, par-dessus. */}
+      {/* Trajets des ondes déjà tirées : entre perpendiculairement au bord
+          sur une case pleine, rejoint l'entrée symétrique côté sortie, en
+          ressort perpendiculairement — couleur du résultat final, pour ne
+          pas avoir à consulter l'historique. Émphasisée (survol/clic) =
+          plus épaisse, par-dessus. */}
       {orderedLines.map((line) => {
-        const from = pointPos(line.fromId);
-        if (!from) return null;
+        const pts = beamPathPoints(line.fromId, line.toId);
+        if (!pts) return null;
         const emphasized = line.id === emphasizedLineId;
-        if (line.kind === "exit" && line.toId && line.toId !== line.fromId) {
-          const to = pointPos(line.toId);
-          if (!to) return null;
-          return (
-            <line
-              key={line.id}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
-              stroke={line.color}
-              strokeWidth={emphasized ? 4 : 2.25}
-              strokeOpacity={emphasized ? 1 : 0.6}
-              strokeLinecap="round"
-              className="beam-line"
-            />
-          );
-        }
-        // Absorbée / perdue, ou rebond immédiat (le point de sortie est le
-        // point d'entrée lui-même, donc une "ligne" entre les deux serait
-        // invisible) : petit segment vers le centre de la grille pour
-        // indiquer "entrée sans en ressortir ailleurs".
-        const dx = centerX - from.x;
-        const dy = centerY - from.y;
-        const len = Math.hypot(dx, dy) || 1;
-        const stubLen = 22;
-        const stubX = from.x + (dx / len) * stubLen;
-        const stubY = from.y + (dy / len) * stubLen;
         return (
-          <line
+          <polyline
             key={line.id}
-            x1={from.x}
-            y1={from.y}
-            x2={stubX}
-            y2={stubY}
+            points={pts}
+            fill="none"
             stroke={line.color}
             strokeWidth={emphasized ? 4 : 2.25}
             strokeOpacity={emphasized ? 1 : 0.6}
             strokeLinecap="round"
+            strokeLinejoin="round"
             strokeDasharray={line.kind === "lost" ? "3 3" : undefined}
             className="beam-line"
           />
