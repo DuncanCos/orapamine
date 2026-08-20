@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import type { RoomOptions } from "../types/protocol";
 import { t } from "../i18n/fr";
+import { generateRandomPseudo } from "../lib/randomPseudo";
+import { Logo } from "./Logo";
 
 const DEFAULT_OPTIONS: RoomOptions = {
   diamond: false,
@@ -12,7 +14,7 @@ const DEFAULT_OPTIONS: RoomOptions = {
 };
 
 export function Lobby() {
-  const [pseudo, setPseudo] = useState("");
+  const [pseudo, setPseudo] = useState(() => generateRandomPseudo());
   const [code, setCode] = useState("");
   const [options, setOptions] = useState<RoomOptions>(DEFAULT_OPTIONS);
   const [error, setError] = useState<string | null>(null);
@@ -65,16 +67,28 @@ export function Lobby() {
 
   return (
     <div className="lobby">
-      <h1>{t("lobby.title")}</h1>
+      <h1 className="lobby-title">
+        <Logo size={56} />
+      </h1>
 
       <label className="field">
         {t("lobby.pseudo")}
-        <input
-          value={pseudo}
-          onChange={(e) => setPseudo(e.target.value)}
-          placeholder={t("lobby.pseudo.placeholder")}
-          maxLength={20}
-        />
+        <div className="lobby-pseudo-row">
+          <input
+            value={pseudo}
+            onChange={(e) => setPseudo(e.target.value)}
+            placeholder={t("lobby.pseudo.placeholder")}
+            maxLength={20}
+          />
+          <button
+            type="button"
+            className="lobby-pseudo-random"
+            title={t("lobby.pseudo.random")}
+            onClick={() => setPseudo(generateRandomPseudo())}
+          >
+            🎲
+          </button>
+        </div>
       </label>
 
       <fieldset className="lobby-options">

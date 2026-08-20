@@ -9,6 +9,7 @@ const fr = {
   "lobby.title": "Orapa Mine",
   "lobby.pseudo": "Pseudo",
   "lobby.pseudo.placeholder": "Ton nom de joueur",
+  "lobby.pseudo.random": "Nouveau pseudo aléatoire",
   "lobby.create": "Créer une partie",
   "lobby.join": "Rejoindre une partie",
   "lobby.code": "Code de la partie",
@@ -29,7 +30,7 @@ const fr = {
 
   "placement.title": "Place tes gemmes",
   "placement.instructions":
-    "Sélectionne une pièce puis clique sur la grille pour la poser. Reclique dessus pour la faire pivoter, ou pour la retirer.",
+    "Fais glisser une pièce vers la grille pour la poser, ou clique dessus puis sur une case. Fais glisser une pièce posée pour la déplacer, ou clique dessus pour la faire pivoter (touche R), la déplacer aux flèches, ou la retirer (Suppr).",
   "placement.rotate": "Pivoter",
   "placement.mirror": "Miroir",
   "placement.remove": "Retirer",

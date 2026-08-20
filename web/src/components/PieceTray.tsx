@@ -7,6 +7,10 @@ interface PieceTrayProps {
   placed: PlacedPiece[];
   pendingPieceId: string | null;
   onSelect: (pieceId: string) => void;
+  onPointerDownPiece?: (pieceId: string, e: React.PointerEvent<HTMLButtonElement>) => void;
+  onDragPointerMove?: (e: React.PointerEvent<HTMLButtonElement>) => void;
+  onDragPointerUp?: (e: React.PointerEvent<HTMLButtonElement>) => void;
+  onDragPointerCancel?: (e: React.PointerEvent<HTMLButtonElement>) => void;
   diamond: boolean;
   black: boolean;
 }
@@ -21,7 +25,18 @@ const LABEL_KEYS: Record<string, string> = {
   black: "piece.black",
 };
 
-export function PieceTray({ catalog, placed, pendingPieceId, onSelect, diamond, black }: PieceTrayProps) {
+export function PieceTray({
+  catalog,
+  placed,
+  pendingPieceId,
+  onSelect,
+  onPointerDownPiece,
+  onDragPointerMove,
+  onDragPointerUp,
+  onDragPointerCancel,
+  diamond,
+  black,
+}: PieceTrayProps) {
   const baseIds = ["red", "yellow", "blue", "white1", "white2"];
   const ids = [...baseIds, ...(diamond ? ["diamond"] : []), ...(black ? ["black"] : [])];
   const placedIds = new Set(placed.map((p) => p.piece_id));
@@ -40,6 +55,10 @@ export function PieceTray({ catalog, placed, pendingPieceId, onSelect, diamond, 
             type="button"
             className={`piece-tray-item${isPlaced ? " piece-tray-item-placed" : ""}${isPending ? " piece-tray-item-pending" : ""}`}
             onClick={() => onSelect(id)}
+            onPointerDown={onPointerDownPiece ? (e) => onPointerDownPiece(id, e) : undefined}
+            onPointerMove={onDragPointerMove}
+            onPointerUp={onDragPointerUp}
+            onPointerCancel={onDragPointerCancel}
             disabled={isPlaced}
           >
             <span className="piece-tray-swatch" style={{ background: swatch }} />

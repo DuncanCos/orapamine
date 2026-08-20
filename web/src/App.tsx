@@ -6,6 +6,7 @@ import { Lobby } from "./components/Lobby";
 import { PlacementScreen } from "./components/PlacementScreen";
 import { GameScreen } from "./components/GameScreen";
 import { ResultScreen } from "./components/ResultScreen";
+import { Logo } from "./components/Logo";
 import { t } from "./i18n/fr";
 import "./styles/theme.css";
 
@@ -45,7 +46,9 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>{t("app.title")}</h1>
+        <h1 className="app-title">
+          <Logo size={32} />
+        </h1>
         <div className="app-header-right">
           {!connected && <span className="conn-banner">{t("conn.disconnected")}</span>}
           {code && (

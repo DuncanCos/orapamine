@@ -58,6 +58,26 @@ h3 {
   font-size: 0.7rem;
 }
 
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+.logo-mark {
+  width: var(--logo-size, 40px);
+  height: var(--logo-size, 40px);
+  flex-shrink: 0;
+  filter: drop-shadow(var(--shadow-offset) var(--shadow-offset) 0 var(--border));
+}
+.logo-wordmark {
+  font-family: var(--font-display);
+  font-size: calc(var(--logo-size, 40px) * 0.32);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
 .app-shell {
   max-width: 900px;
   margin: 0 auto;
@@ -73,6 +93,10 @@ h3 {
   justify-content: space-between;
   border-bottom: var(--border-width) solid var(--border);
   padding-bottom: 12px;
+}
+.app-title {
+  margin: 0;
+  display: flex;
 }
 .app-header-right {
   display: flex;
@@ -165,6 +189,19 @@ select {
   font-size: 0.75rem;
 }
 
+.lobby-pseudo-row {
+  display: flex;
+  gap: 6px;
+}
+.lobby-pseudo-row input {
+  flex: 1;
+}
+.lobby-pseudo-random {
+  padding: 6px 10px;
+  font-size: 1rem;
+  line-height: 1;
+}
+
 fieldset {
   border: var(--border-width) solid var(--border);
   margin-bottom: 16px;
@@ -199,6 +236,9 @@ legend {
   border: var(--border-width) solid var(--border);
   box-shadow: var(--shadow-offset) var(--shadow-offset) 0 0 var(--border);
   padding: 20px;
+}
+.lobby-title {
+  margin: 0 0 20px;
 }
 
 .lobby-actions {
@@ -260,6 +300,25 @@ legend {
 .piece-selected .piece-shape {
   stroke: var(--secondary);
   stroke-width: 3;
+}
+.piece-group:active {
+  cursor: grabbing;
+}
+.piece-dragging-source {
+  opacity: 0.3;
+}
+.piece-ghost {
+  opacity: 0.55;
+}
+.piece-ghost .piece-shape {
+  stroke-width: 2.5;
+  stroke-dasharray: 4 3;
+}
+.piece-ghost-valid .piece-shape {
+  stroke: var(--ok);
+}
+.piece-ghost-invalid .piece-shape {
+  stroke: var(--bad);
 }
 .probe-marker circle {
   pointer-events: none;
@@ -323,6 +382,11 @@ legend {
   align-items: center;
   gap: 6px;
   font-size: 0.6rem;
+  cursor: grab;
+  touch-action: none;
+}
+.piece-tray-item:active {
+  cursor: grabbing;
 }
 .piece-tray-item-pending {
   background: var(--secondary);

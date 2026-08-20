@@ -1,9 +1,10 @@
+import { forwardRef } from "react";
 import { boardPoints } from "../lib/points";
 import { GEM_COLORS, SPECIAL_COLORS } from "../lib/colors";
 import type { CellKind, GemColor, PieceCatalog, PlacedPiece } from "../types/protocol";
 
-const CELL = 34;
-const MARGIN = 26;
+export const CELL = 34;
+export const MARGIN = 26;
 
 // Sommets (en coordonnées unité, 0..1) du polygone couvrant la demi-case
 // adjacente à chaque coin — voir la convention dans
@@ -38,6 +39,31 @@ function shapeFill(color: GemColor | null, special: "absorb" | "transparent" | n
   return "#999";
 }
 
+/** Convertit des coordonnées écran (clientX/clientY, ex. depuis un
+ * PointerEvent) en coordonnées de case de grille, en tenant compte du
+ * redimensionnement CSS du SVG (viewBox vs taille affichée réelle). Utilisé
+ * pour le drag & drop des pièces, qui doit rester correct quel que soit le
+ * point où le pointeur a été capturé. */
+export function screenToCell(
+  svg: SVGSVGElement,
+  clientX: number,
+  clientY: number,
+  gridWidth: number,
+  gridHeight: number,
+): { x: number; y: number } {
+  const rect = svg.getBoundingClientRect();
+  const viewW = MARGIN * 2 + gridWidth * CELL;
+  const viewH = MARGIN * 2 + gridHeight * CELL;
+  const scaleX = rect.width > 0 ? viewW / rect.width : 1;
+  const scaleY = rect.height > 0 ? viewH / rect.height : 1;
+  const svgX = (clientX - rect.left) * scaleX;
+  const svgY = (clientY - rect.top) * scaleY;
+  return {
+    x: Math.floor((svgX - MARGIN) / CELL),
+    y: Math.floor((svgY - MARGIN) / CELL),
+  };
+}
+
 export interface ProbeMarker {
   x: number;
   y: number;
@@ -63,6 +89,17 @@ export interface BeamLine {
   kind: "exit" | "absorbed" | "lost";
 }
 
+/** Aperçu translucide d'une pièce en cours de pose/déplacement, affiché
+ * par-dessus la grille pendant un glisser (ou un survol en mode "pièce en
+ * attente"). `valid` pilote la couleur du contour (vert/rouge). */
+export interface GhostPiece {
+  pieceId: string;
+  orientation: number;
+  anchorX: number;
+  anchorY: number;
+  valid: boolean;
+}
+
 export interface BoardProps {
   catalog: PieceCatalog;
   placements: PlacedPiece[];
@@ -71,31 +108,50 @@ export interface BoardProps {
   onPointClick?: (id: string) => void;
   onPointHover?: (id: string | null) => void;
   onCellClick?: (x: number, y: number) => void;
+  onCellHover?: (x: number, y: number) => void;
+  onBoardLeave?: () => void;
+  onPiecePointerDown?: (index: number, e: React.PointerEvent<SVGGElement>) => void;
   onPieceClick?: (index: number) => void;
+  onDragPointerMove?: (e: React.PointerEvent<SVGGElement>) => void;
+  onDragPointerUp?: (e: React.PointerEvent<SVGGElement>) => void;
+  onDragPointerCancel?: (e: React.PointerEvent<SVGGElement>) => void;
   selectedIndex?: number | null;
+  draggingIndex?: number | null;
   faultyIndices?: Set<number>;
+  ghost?: GhostPiece | null;
   markers?: ProbeMarker[];
   highlightPoints?: PointHighlight[];
   beamLines?: BeamLine[];
   emphasizedLineId?: string | null;
 }
 
-export function Board({
-  catalog,
-  placements,
-  showPoints = false,
-  usedPointIds,
-  onPointClick,
-  onPointHover,
-  onCellClick,
-  onPieceClick,
-  selectedIndex = null,
-  faultyIndices,
-  markers,
-  highlightPoints,
-  beamLines,
-  emphasizedLineId,
-}: BoardProps) {
+export const Board = forwardRef<SVGSVGElement, BoardProps>(function Board(
+  {
+    catalog,
+    placements,
+    showPoints = false,
+    usedPointIds,
+    onPointClick,
+    onPointHover,
+    onCellClick,
+    onCellHover,
+    onBoardLeave,
+    onPiecePointerDown,
+    onPieceClick,
+    onDragPointerMove,
+    onDragPointerUp,
+    onDragPointerCancel,
+    selectedIndex = null,
+    draggingIndex = null,
+    faultyIndices,
+    ghost,
+    markers,
+    highlightPoints,
+    beamLines,
+    emphasizedLineId,
+  },
+  ref,
+) {
   const w = catalog.grid_width;
   const h = catalog.grid_height;
   const ox = MARGIN;
@@ -172,16 +228,21 @@ export function Board({
     return 0;
   });
 
+  const ghostPiece = ghost ? catalog.pieces.find((pc) => pc.id === ghost.pieceId) : undefined;
+  const ghostShape = ghostPiece ? ghostPiece.orientations[ghost!.orientation] : undefined;
+
   return (
     <svg
+      ref={ref}
       className="board-svg"
       viewBox={`0 0 ${viewW} ${viewH}`}
       role="group"
       aria-label="Plateau de jeu"
+      onMouseLeave={onBoardLeave}
     >
       <rect x={ox} y={oy} width={w * CELL} height={h * CELL} className="board-bg" />
 
-      {onCellClick &&
+      {(onCellClick || onCellHover) &&
         Array.from({ length: w * h }, (_, i) => {
           const x = i % w;
           const y = Math.floor(i / w);
@@ -193,7 +254,8 @@ export function Board({
               width={CELL}
               height={CELL}
               className="board-cell-hit"
-              onClick={() => onCellClick(x, y)}
+              onClick={onCellClick ? () => onCellClick(x, y) : undefined}
+              onMouseEnter={onCellHover ? () => onCellHover(x, y) : undefined}
             />
           );
         })}
@@ -229,12 +291,18 @@ export function Board({
         const fill = shapeFill(piece.color, piece.special);
         const faulty = faultyIndices?.has(idx);
         const selected = selectedIndex === idx;
+        const dragging = draggingIndex === idx;
+        const interactive = Boolean(onPiecePointerDown || onPieceClick);
         return (
           <g
             key={idx}
-            className={`piece-group${faulty ? " piece-faulty" : ""}${selected ? " piece-selected" : ""}`}
+            className={`piece-group${faulty ? " piece-faulty" : ""}${selected ? " piece-selected" : ""}${dragging ? " piece-dragging-source" : ""}`}
+            onPointerDown={onPiecePointerDown ? (e) => onPiecePointerDown(idx, e) : undefined}
+            onPointerMove={onDragPointerMove}
+            onPointerUp={onDragPointerUp}
+            onPointerCancel={onDragPointerCancel}
             onClick={onPieceClick ? () => onPieceClick(idx) : undefined}
-            style={onPieceClick ? { cursor: "pointer" } : undefined}
+            style={interactive ? { cursor: "grab", touchAction: "none" } : undefined}
           >
             {shape.map((cell, ci) => {
               const cx = ox + (p.anchor_x + cell.x) * CELL;
@@ -253,6 +321,28 @@ export function Board({
           </g>
         );
       })}
+
+      {/* Aperçu de pose/déplacement en cours (glisser ou survol pièce en attente) */}
+      {ghost && ghostPiece && ghostShape && (
+        <g
+          className={`piece-ghost ${ghost.valid ? "piece-ghost-valid" : "piece-ghost-invalid"}`}
+          style={{ pointerEvents: "none" }}
+        >
+          {ghostShape.map((cell, ci) => {
+            const cx = ox + (ghost.anchorX + cell.x) * CELL;
+            const cy = oy + (ghost.anchorY + cell.y) * CELL;
+            const fill = shapeFill(ghostPiece.color, ghostPiece.special);
+            if (cell.kind === "square") {
+              return <rect key={ci} x={cx} y={cy} width={CELL} height={CELL} fill={fill} className="piece-shape" />;
+            }
+            const corner = cellKindCorner(cell.kind);
+            const pts = TRIANGLE_POINTS[corner]
+              .map(([ux, uy]) => `${cx + ux * CELL},${cy + uy * CELL}`)
+              .join(" ");
+            return <polygon key={ci} points={pts} fill={fill} className="piece-shape" />;
+          })}
+        </g>
+      )}
 
       {/* Marqueurs de sondage */}
       {markers?.map((m, i) => {
@@ -315,7 +405,7 @@ export function Board({
       })}
     </svg>
   );
-}
+});
 
 function cellKindCorner(kind: CellKind): "nw" | "ne" | "se" | "sw" {
   return kind.slice(4) as "nw" | "ne" | "se" | "sw";
