@@ -15,8 +15,16 @@ export default function App() {
   const tryRestoreSession = useGameStore((s) => s.tryRestoreSession);
   const connected = useGameStore((s) => s.connected);
   const phase = useGameStore((s) => s.phase);
+  const code = useGameStore((s) => s.code);
   const errorMessage = useGameStore((s) => s.errorMessage);
   const clearError = useGameStore((s) => s.clearError);
+  const leaveGame = useGameStore((s) => s.leaveGame);
+
+  function handleLeaveGame() {
+    const mustConfirm = phase === "placement" || phase === "playing";
+    if (mustConfirm && !window.confirm(t("app.leave_confirm"))) return;
+    leaveGame();
+  }
 
   useEffect(() => {
     ensureWasmReady().then(() => setCatalog(getCatalog()));
@@ -38,7 +46,14 @@ export default function App() {
     <div className="app-shell">
       <header className="app-header">
         <h1>{t("app.title")}</h1>
-        {!connected && <span className="conn-banner">{t("conn.disconnected")}</span>}
+        <div className="app-header-right">
+          {!connected && <span className="conn-banner">{t("conn.disconnected")}</span>}
+          {code && (
+            <button type="button" className="leave-game-button" onClick={handleLeaveGame}>
+              {t("app.leave_game")}
+            </button>
+          )}
+        </div>
       </header>
 
       {errorMessage && (

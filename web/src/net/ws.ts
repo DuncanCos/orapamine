@@ -87,6 +87,17 @@ export class GameSocket {
     this.closedByUser = true;
     this.ws?.close();
   }
+
+  /** Quitte définitivement la partie en cours (retour au menu) : oublie le
+   * jeton (plus de reconnexion possible à cette partie), ferme la
+   * connexion, puis en rouvre aussitôt une neuve et vierge pour permettre
+   * de créer/rejoindre une autre partie. */
+  leaveGame(): void {
+    this.token = null;
+    localStorage.removeItem("orapamine_token");
+    this.close();
+    this.connect();
+  }
 }
 
 export function defaultWsUrl(): string {

@@ -39,6 +39,8 @@ export function GameScreen({ catalog }: GameScreenProps) {
   const fireBeam = useGameStore((s) => s.fireBeam);
   const probe = useGameStore((s) => s.probe);
   const sendReaction = useGameStore((s) => s.sendReaction);
+  const revealedBoard = useGameStore((s) => s.revealedBoard);
+  const revealSolution = useGameStore((s) => s.revealSolution);
 
   const [mode, setMode] = useState<ActionMode>("beam");
   const [hoveredEntry, setHoveredEntry] = useState<HistoryEntry | null>(null);
@@ -169,7 +171,7 @@ export function GameScreen({ catalog }: GameScreenProps) {
         </p>
         <Board
           catalog={catalog}
-          placements={[]}
+          placements={revealedBoard ?? []}
           showPoints
           usedPointIds={usedPointIds}
           onPointClick={handlePointClick}
@@ -182,6 +184,14 @@ export function GameScreen({ catalog }: GameScreenProps) {
         <p className="muted beam-hint">
           {beamLines.length > 0 && t("game.beam.click_hint")}
         </p>
+        {isSolo && !revealedBoard && (
+          <button type="button" className="solution-button" onClick={revealSolution}>
+            {t("game.solution.reveal")}
+          </button>
+        )}
+        {revealedBoard && (
+          <p className="solution-revealed-label">{t("game.solution.title")}</p>
+        )}
       </section>
 
       <section className="game-board-section game-board-own">

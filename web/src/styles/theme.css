@@ -74,6 +74,15 @@ h3 {
   border-bottom: var(--border-width) solid var(--border);
   padding-bottom: 12px;
 }
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.leave-game-button {
+  font-size: 0.6rem;
+  padding: 6px 10px;
+}
 
 .app-loading {
   display: flex;
@@ -388,6 +397,17 @@ legend {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
+}
+.solution-button {
+  margin-top: 8px;
+  background: var(--secondary);
+  color: var(--accent-ink);
+}
+.solution-revealed-label {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  color: var(--secondary);
 }
 
 .hint-ok {

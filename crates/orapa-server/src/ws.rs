@@ -142,6 +142,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
                 ClientMsg::CheckHypothesis { pieces } => logic::check_hypothesis(&game, idx, pieces),
                 ClientMsg::Reaction { id } => logic::reaction(&game, idx, id),
                 ClientMsg::RequestRematch => logic::request_rematch(&mut game, idx),
+                ClientMsg::RevealSolution => logic::reveal_solution(&game, idx),
                 ClientMsg::CreateGame { .. }
                 | ClientMsg::JoinGame { .. }
                 | ClientMsg::Reconnect { .. }

@@ -54,12 +54,15 @@ interface GameState {
   gameOver: GameOverState | null;
   errorMessage: string | null;
   reaction: ReactionToast | null;
+  revealedBoard: PlacedPiece[] | null;
 
   connect(): void;
   tryRestoreSession(): boolean;
   createGame(pseudo: string, options: RoomOptions): void;
   joinGame(code: string, pseudo: string): void;
   startSolo(pseudo: string, options: RoomOptions): void;
+  leaveGame(): void;
+  revealSolution(): void;
 
   setOwnPlacement(pieces: PlacedPiece[]): void;
   requestRandomPlacement(): void;
@@ -109,6 +112,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   gameOver: null,
   errorMessage: null,
   reaction: null,
+  revealedBoard: null,
 
   connect() {
     const s = getSocket();
@@ -141,6 +145,9 @@ export const useGameStore = create<GameState>((set, get) => ({
               state.ownPlacement.length === 0 && msg.your_placement
                 ? msg.your_placement
                 : state.ownPlacement,
+            // Une revanche vide l'historique : la solution précédemment
+            // révélée (mode solo) ne correspond plus au nouveau plateau.
+            revealedBoard: msg.history.length === 0 ? null : state.revealedBoard,
           }));
           break;
         case "PlacementRejected":
@@ -174,6 +181,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         case "ReactionReceived":
           set({ reaction: { playerIndex: msg.player_index, id: msg.id, at: Date.now() } });
           break;
+        case "SolutionRevealed":
+          set({ revealedBoard: msg.board });
+          break;
         case "Error":
           set({ errorMessage: msg.message });
           break;
@@ -203,6 +213,36 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
   startSolo(pseudo, options) {
     getSocket().send({ type: "StartSolo", pseudo, options });
+  },
+
+  leaveGame() {
+    getSocket().leaveGame();
+    set({
+      code: null,
+      yourIndex: null,
+      players: [],
+      phase: "lobby",
+      currentTurn: null,
+      firstPlayerIndex: null,
+      suddenDeath: false,
+      options: null,
+      history: [],
+      violations: [],
+      lastBeamResult: null,
+      lastProbeResult: null,
+      lastSolutionCorrect: null,
+      ownPlacement: [],
+      hypothesis: [],
+      hypothesisCheck: null,
+      gameOver: null,
+      errorMessage: null,
+      reaction: null,
+      revealedBoard: null,
+    });
+  },
+
+  revealSolution() {
+    getSocket().send({ type: "RevealSolution" });
   },
 
   setOwnPlacement(pieces) {

@@ -82,7 +82,8 @@ export type ClientMsg =
   | { type: "SubmitSolution"; pieces: PlacedPiece[] }
   | { type: "CheckHypothesis"; pieces: PlacedPiece[] }
   | { type: "Reaction"; id: string }
-  | { type: "RequestRematch" };
+  | { type: "RequestRematch" }
+  | { type: "RevealSolution" };
 
 // --- Serveur -> Client ---
 
@@ -109,6 +110,7 @@ export type ServerMsg =
   | { type: "HypothesisCheckResult"; consistent: boolean; contradicting_entries: string[] }
   | { type: "GameOver"; winner: number | null; boards: PlacedPiece[][]; history: HistoryEntry[] }
   | { type: "ReactionReceived"; player_index: number; id: string }
+  | { type: "SolutionRevealed"; board: PlacedPiece[] }
   | { type: "Error"; code: string; message: string };
 
 // --- Catalogue de pièces (voir orapa-wasm::catalog_json) ---

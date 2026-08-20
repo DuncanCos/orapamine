@@ -4,6 +4,8 @@
 
 const fr = {
   "app.title": "Orapa Mine",
+  "app.leave_game": "Retour au menu",
+  "app.leave_confirm": "Quitter la partie en cours et revenir au menu principal ?",
   "lobby.title": "Orapa Mine",
   "lobby.pseudo": "Pseudo",
   "lobby.pseudo.placeholder": "Ton nom de joueur",
@@ -67,6 +69,8 @@ const fr = {
   "game.reactions.gg": "Bien joué !",
   "game.reactions.oops": "Aïe !",
   "game.reactions.think": "Je réfléchis…",
+  "game.solution.reveal": "Voir la solution",
+  "game.solution.title": "Solution",
 
   "result.title": "Partie terminée",
   "result.win": "Tu as gagné !",

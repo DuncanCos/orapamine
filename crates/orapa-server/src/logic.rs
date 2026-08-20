@@ -458,6 +458,25 @@ pub fn reaction(game: &Game, idx: usize, id: String) {
     broadcast(game, &ServerMsg::ReactionReceived { player_index: idx, id });
 }
 
+/// Mode solo uniquement : révèle la disposition adverse générée par le
+/// serveur sans mettre fin à la partie (bouton "solution" du mode
+/// entraînement). Refusé en duel pour ne pas permettre de tricher.
+pub fn reveal_solution(game: &Game, idx: usize) {
+    if game.kind != Kind::Solo {
+        send(
+            game,
+            idx,
+            &ServerMsg::Error {
+                code: "not_solo".into(),
+                message: "La solution ne peut être révélée qu'en mode solo.".into(),
+            },
+        );
+        return;
+    }
+    let board = game.secrets.get(1).and_then(|s| s.clone()).unwrap_or_default();
+    send(game, idx, &ServerMsg::SolutionRevealed { board });
+}
+
 pub fn request_rematch(game: &mut Game, idx: usize) {
     if game.phase != Phase::Finished {
         return;

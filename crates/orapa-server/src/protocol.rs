@@ -45,6 +45,10 @@ pub enum ClientMsg {
     CheckHypothesis { pieces: Vec<PlacedPiece> },
     Reaction { id: String },
     RequestRematch,
+    /// Mode solo uniquement : révèle immédiatement la disposition complète
+    /// de l'adversaire généré par le serveur, sans mettre fin à la partie
+    /// (bouton "solution" du mode entraînement). Refusé en duel.
+    RevealSolution,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -156,6 +160,9 @@ pub enum ServerMsg {
     ReactionReceived {
         player_index: usize,
         id: String,
+    },
+    SolutionRevealed {
+        board: Vec<PlacedPiece>,
     },
     Error {
         code: String,
