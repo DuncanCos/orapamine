@@ -1,0 +1,9 @@
+[package]
+name = "orapa-cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+orapa-core = { path = "../orapa-core" }
+rand = { version = "0.8", features = ["small_rng"] }
+clap = { version = "4", features = ["derive"] }

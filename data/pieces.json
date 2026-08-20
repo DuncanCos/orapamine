@@ -1,0 +1,103 @@
+{
+  "grid": { "width": 10, "height": 8 },
+  "points": {
+    "count": 36,
+    "note": "36 points de tir sur le pourtour : lettres A-R (18) à gauche et en bas, chiffres 1-18 en haut et à droite, comme l'adaptation Board Game Arena."
+  },
+  "pieces": [
+    {
+      "id": "red",
+      "label_fr": "Rouge",
+      "color": "red",
+      "expansion": null,
+      "special": null,
+      "cells": [
+        { "x": 0, "y": 0, "kind": "tri_ne" },
+        { "x": 1, "y": 0, "kind": "square" },
+        { "x": 2, "y": 0, "kind": "tri_sw" }
+      ]
+    },
+    {
+      "id": "yellow",
+      "label_fr": "Jaune",
+      "color": "yellow",
+      "expansion": null,
+      "special": null,
+      "cells": [
+        { "x": 0, "y": 0, "kind": "square" },
+        { "x": 1, "y": 0, "kind": "tri_nw" },
+        { "x": 0, "y": 1, "kind": "tri_nw" }
+      ]
+    },
+    {
+      "id": "blue",
+      "label_fr": "Bleu",
+      "color": "blue",
+      "expansion": null,
+      "special": null,
+      "cells": [
+        { "x": 0, "y": 0, "kind": "tri_ne" },
+        { "x": 1, "y": 0, "kind": "square" },
+        { "x": 2, "y": 0, "kind": "square" },
+        { "x": 3, "y": 0, "kind": "tri_nw" },
+        { "x": 1, "y": 1, "kind": "tri_ne" },
+        { "x": 2, "y": 1, "kind": "tri_nw" }
+      ]
+    },
+    {
+      "id": "white1",
+      "label_fr": "Blanc (grand triangle)",
+      "color": "white",
+      "expansion": null,
+      "special": null,
+      "cells": [
+        { "x": 0, "y": 0, "kind": "tri_ne" },
+        { "x": 1, "y": 0, "kind": "square" },
+        { "x": 2, "y": 0, "kind": "square" },
+        { "x": 3, "y": 0, "kind": "tri_nw" },
+        { "x": 1, "y": 1, "kind": "tri_ne" },
+        { "x": 2, "y": 1, "kind": "tri_nw" }
+      ]
+    },
+    {
+      "id": "white2",
+      "label_fr": "Blanc (losange)",
+      "color": "white",
+      "expansion": null,
+      "special": null,
+      "cells": [
+        { "x": 0, "y": 0, "kind": "tri_se" },
+        { "x": 1, "y": 0, "kind": "tri_sw" },
+        { "x": 0, "y": 1, "kind": "tri_ne" },
+        { "x": 1, "y": 1, "kind": "tri_nw" }
+      ]
+    },
+    {
+      "id": "diamond",
+      "label_fr": "Diamant",
+      "color": null,
+      "expansion": "diamond",
+      "special": "transparent",
+      "cells": [
+        { "x": 0, "y": 0, "kind": "tri_se" },
+        { "x": 1, "y": 0, "kind": "tri_sw" },
+        { "x": 0, "y": 1, "kind": "tri_ne" },
+        { "x": 1, "y": 1, "kind": "tri_nw" }
+      ]
+    },
+    {
+      "id": "black",
+      "label_fr": "Corps noir",
+      "color": null,
+      "expansion": "black",
+      "special": "absorb",
+      "cells": [
+        { "x": 0, "y": 0, "kind": "square" },
+        { "x": 1, "y": 0, "kind": "square" }
+      ]
+    }
+  ],
+  "rules": {
+    "white_symmetry_forbidden": true
+  }
+}
