@@ -567,6 +567,59 @@ legend {
   flex-wrap: wrap;
 }
 
+/* --- Règles / modale --- */
+
+.rules-link-button {
+  font-size: 0.6rem;
+  padding: 6px 10px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 23, 18, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+}
+.modal-box {
+  background: var(--panel);
+  border: var(--border-width) solid var(--border);
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 0 var(--border);
+  padding: 20px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--border-width) solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.modal-header h2 {
+  margin: 0;
+}
+.modal-close {
+  padding: 4px 8px;
+  font-size: 0.7rem;
+}
+.rules-modal section {
+  margin-bottom: 16px;
+}
+.rules-modal p {
+  margin: 6px 0;
+  line-height: 1.4;
+}
+.rules-close-button {
+  margin-top: 8px;
+}
+
 /* --- Responsive --- */
 
 @media (max-width: 600px) {

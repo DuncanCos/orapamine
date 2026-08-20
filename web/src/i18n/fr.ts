@@ -111,6 +111,29 @@ const fr = {
 
   "conn.disconnected": "Connexion perdue, tentative de reconnexion…",
   "conn.reconnected": "Reconnecté.",
+
+  "rules.link": "Comment jouer ?",
+  "rules.title": "Comment jouer",
+  "rules.close": "Fermer",
+  "rules.goal.title": "Le but du jeu",
+  "rules.goal.body":
+    "Chaque joueur cache secrètement 5 gemmes (formes tangram) sur sa grille 10×8. À ton tour, tu sondes la grille de ton adversaire en tirant des ondes lumineuses depuis le pourtour pour déduire où se cachent ses gemmes. Le premier à trouver la disposition complète de l'adversaire gagne — mais gare aux fausses pistes, une proposition erronée te coûte une vie.",
+  "rules.setup.title": "Mise en place",
+  "rules.setup.body":
+    "Place tes 5 gemmes (1 rouge, 1 jaune, 1 bleue, 2 blanches) sur ta grille : glisse une pièce depuis la réserve, clique dessus pour la faire pivoter ou la retourner, sans qu'elle sorte de la grille, chevauche une autre pièce ou la touche par une arête pleine (les coins peuvent se toucher). Chaque gemme doit rester atteignable par au moins une onde, et les deux blanches ne peuvent pas être placées en symétrie parfaite.",
+  "rules.turn.title": "À ton tour",
+  "rules.turn.beam":
+    "Envoyer une onde : clique sur un point du pourtour de la grille adverse. L'onde se propage en ligne droite, rebondit ou dévie en touchant une gemme, puis ressort quelque part sur le pourtour avec une couleur qui dépend des gemmes traversées.",
+  "rules.turn.probe":
+    "Sonder une case : clique sur une case précise de la grille adverse pour savoir si une gemme s'y trouve.",
+  "rules.turn.solution":
+    "Proposer une solution : place tes hypothèses sur la grille d'hypothèses puis valide. Si tu te trompes, tu perds une vie (1 ou 2 selon les options de la partie) ; à 0 vie, tu es éliminé.",
+  "rules.beam.title": "Lire le résultat d'une onde",
+  "rules.beam.body":
+    "Une onde qui touche une face droite d'une gemme fait demi-tour ; une onde qui touche l'hypoténuse d'un triangle dévie à 90°. Chaque couleur de gemme traversée s'ajoute au mélange final (voir le tableau ci-dessous) — une onde qui ne touche rien ressort transparente.",
+  "rules.end.title": "Fin de partie",
+  "rules.end.body":
+    "Une proposition juste gagne la partie immédiatement — sauf si tu es le premier joueur du tour à trouver : ton adversaire a alors droit à un dernier tour pour égaliser (mort subite). En mode solo, entraîne-toi à déduire une disposition tirée au hasard, sans adversaire.",
 } as const;
 
 export type TranslationKey = keyof typeof fr;

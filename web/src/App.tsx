@@ -7,11 +7,13 @@ import { PlacementScreen } from "./components/PlacementScreen";
 import { GameScreen } from "./components/GameScreen";
 import { ResultScreen } from "./components/ResultScreen";
 import { Logo } from "./components/Logo";
+import { RulesModal } from "./components/RulesModal";
 import { t } from "./i18n/fr";
 import "./styles/theme.css";
 
 export default function App() {
   const [catalog, setCatalog] = useState<PieceCatalog | null>(null);
+  const [rulesOpen, setRulesOpen] = useState(false);
   const connect = useGameStore((s) => s.connect);
   const tryRestoreSession = useGameStore((s) => s.tryRestoreSession);
   const connected = useGameStore((s) => s.connected);
@@ -51,6 +53,9 @@ export default function App() {
         </h1>
         <div className="app-header-right">
           {!connected && <span className="conn-banner">{t("conn.disconnected")}</span>}
+          <button type="button" className="rules-link-button" onClick={() => setRulesOpen(true)}>
+            {t("rules.link")}
+          </button>
           {code && (
             <button type="button" className="leave-game-button" onClick={handleLeaveGame}>
               {t("app.leave_game")}
@@ -64,6 +69,8 @@ export default function App() {
           {errorMessage}
         </div>
       )}
+
+      {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} />}
 
       <main>
         {phase === "connecting" || phase === "lobby" ? (
