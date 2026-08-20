@@ -149,7 +149,20 @@ export function Board({
     const to = edgePosAndDir(toId);
     if (!to) return null;
     const toInner = { x: to.x + to.dx * stub, y: to.y + to.dy * stub };
-    return `${from.x},${from.y} ${fromInner.x},${fromInner.y} ${toInner.x},${toInner.y} ${to.x},${to.y}`;
+    // Relie les deux cases d'entrée par un coude à angle droit — jamais de
+    // segment en diagonale : soit les deux points sont déjà alignés (une
+    // seule ligne droite suffit), soit on passe par un point de coude
+    // horizontal-puis-vertical (ou l'inverse, selon l'axe d'entrée) pour
+    // ne garder que des segments horizontaux/verticaux.
+    let middle: string;
+    if (fromInner.x === toInner.x || fromInner.y === toInner.y) {
+      middle = "";
+    } else if (from.dx !== 0) {
+      middle = ` ${toInner.x},${fromInner.y}`;
+    } else {
+      middle = ` ${fromInner.x},${toInner.y}`;
+    }
+    return `${from.x},${from.y} ${fromInner.x},${fromInner.y}${middle} ${toInner.x},${toInner.y} ${to.x},${to.y}`;
   }
 
   // L'onde émphasisée se dessine en dernier (par-dessus les autres).
