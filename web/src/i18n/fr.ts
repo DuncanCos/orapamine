@@ -50,6 +50,7 @@ const fr = {
   "game.action.solution": "Proposer une solution",
   "game.action.pick_point": "Clique sur un point du bord de la grille adverse.",
   "game.action.pick_cell": "Clique sur une case de la grille adverse.",
+  "game.beam.click_hint": "Clique sur un point déjà tiré pour mettre son trajet en évidence.",
   "game.action.submit_hint":
     "Construis ta grille d'hypothèses ci-dessous puis valide pour la soumettre comme solution.",
   "game.hypothesis.title": "Grille d'hypothèses",

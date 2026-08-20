@@ -278,6 +278,18 @@ legend {
 .board-point-exit circle {
   fill: var(--accent);
 }
+.board-point-emphasized circle {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+.beam-line {
+  pointer-events: none;
+  transition: stroke-width 80ms steps(1), stroke-opacity 80ms steps(1);
+}
+.beam-hint {
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
 
 /* --- Placement --- */
 

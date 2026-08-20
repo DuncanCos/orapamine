@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import { useGameStore } from "../store/gameStore";
-import { Board, type PointHighlight, type ProbeMarker } from "./Board";
+import { Board, type BeamLine, type ProbeMarker } from "./Board";
 import { PlacementEditor } from "./PlacementEditor";
 import { HistoryPanel } from "./HistoryPanel";
 import { ColorLegend } from "./ColorLegend";
 import { localFireBeam, localProbe } from "../wasmClient";
+import { RESULT_COLORS, SPECIAL_COLORS } from "../lib/colors";
 import type { GemColor, HistoryEntry, PieceCatalog } from "../types/protocol";
 import { t } from "../i18n/fr";
+
+const LOST_COLOR = "#8a7f6a";
 
 interface GameScreenProps {
   catalog: PieceCatalog;
@@ -39,6 +42,8 @@ export function GameScreen({ catalog }: GameScreenProps) {
 
   const [mode, setMode] = useState<ActionMode>("beam");
   const [hoveredEntry, setHoveredEntry] = useState<HistoryEntry | null>(null);
+  const [hoveredPointId, setHoveredPointId] = useState<string | null>(null);
+  const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
 
   const isSolo = players.length === 1;
   const opponentIndex = yourIndex === null ? null : yourIndex === 0 ? 1 : 0;
@@ -74,15 +79,32 @@ export function GameScreen({ catalog }: GameScreenProps) {
       color: typeof h.result === "object" ? (h.result.color as GemColor) : undefined,
     }));
 
-  const highlightPoints: PointHighlight[] = [];
-  const shown = hoveredEntry ?? [...yourShotsOnOpponent].reverse().find((h) => h.kind === "Beam");
-  if (shown && shown.kind === "Beam" && shown.actor === yourIndex) {
-    highlightPoints.push({ id: shown.entry, role: "entry" });
-    if (shown.outcome.kind === "Exit") highlightPoints.push({ id: shown.outcome.point, role: "exit" });
-  }
+  // Trajet de chaque onde tirée sur l'adversaire, dessiné directement sur
+  // le plateau (couleur du résultat final) pour ne pas avoir à ouvrir
+  // l'historique à chaque fois.
+  const beamLines: BeamLine[] = yourShotsOnOpponent
+    .filter((h): h is HistoryEntry & { kind: "Beam" } => h.kind === "Beam")
+    .map((h) => {
+      if (h.outcome.kind === "Exit") {
+        return { id: h.entry, fromId: h.entry, toId: h.outcome.point, color: RESULT_COLORS[h.outcome.color], kind: "exit" as const };
+      }
+      if (h.outcome.kind === "Absorbed") {
+        return { id: h.entry, fromId: h.entry, toId: null, color: SPECIAL_COLORS.absorb, kind: "absorbed" as const };
+      }
+      return { id: h.entry, fromId: h.entry, toId: null, color: LOST_COLOR, kind: "lost" as const };
+    });
+  // Le survol de l'historique ou du point lui-même émphasise sa ligne ; un
+  // clic sur un point déjà tiré "épingle" cette émphase (pratique au
+  // tactile, où il n'y a pas de survol).
+  const hoveredBeamEntry = hoveredEntry?.kind === "Beam" && hoveredEntry.actor === yourIndex ? hoveredEntry.entry : null;
+  const emphasizedLineId = hoveredPointId ?? hoveredBeamEntry ?? selectedPointId;
 
   function handlePointClick(id: string) {
-    if (!isYourTurn) return;
+    if (usedPointIds.has(id)) {
+      setSelectedPointId((cur) => (cur === id ? null : id));
+      return;
+    }
+    if (!isYourTurn || mode !== "beam") return;
     fireBeam(id);
   }
   function handleCellClick(x: number, y: number) {
@@ -150,11 +172,16 @@ export function GameScreen({ catalog }: GameScreenProps) {
           placements={[]}
           showPoints
           usedPointIds={usedPointIds}
-          onPointClick={isYourTurn && mode === "beam" ? handlePointClick : undefined}
+          onPointClick={handlePointClick}
+          onPointHover={setHoveredPointId}
           onCellClick={isYourTurn && mode === "probe" ? handleCellClick : undefined}
           markers={opponentMarkers}
-          highlightPoints={highlightPoints}
+          beamLines={beamLines}
+          emphasizedLineId={emphasizedLineId}
         />
+        <p className="muted beam-hint">
+          {beamLines.length > 0 && t("game.beam.click_hint")}
+        </p>
       </section>
 
       <section className="game-board-section game-board-own">

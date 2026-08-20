@@ -50,18 +50,34 @@ export interface PointHighlight {
   role: "entry" | "exit";
 }
 
+/** Trajet complet d'une onde (point d'entrée -> point de sortie), pour
+ * dessiner une ligne directement sur le plateau plutôt que de forcer à
+ * aller consulter l'historique. Les ondes absorbées ou perdues n'ont pas
+ * de `toId` : on trace un petit segment depuis le point d'entrée vers le
+ * centre de la grille pour indiquer "entrée sans ressortir". */
+export interface BeamLine {
+  id: string;
+  fromId: string;
+  toId: string | null;
+  color: string;
+  kind: "exit" | "absorbed" | "lost";
+}
+
 export interface BoardProps {
   catalog: PieceCatalog;
   placements: PlacedPiece[];
   showPoints?: boolean;
   usedPointIds?: Set<string>;
   onPointClick?: (id: string) => void;
+  onPointHover?: (id: string | null) => void;
   onCellClick?: (x: number, y: number) => void;
   onPieceClick?: (index: number) => void;
   selectedIndex?: number | null;
   faultyIndices?: Set<number>;
   markers?: ProbeMarker[];
   highlightPoints?: PointHighlight[];
+  beamLines?: BeamLine[];
+  emphasizedLineId?: string | null;
 }
 
 export function Board({
@@ -70,12 +86,15 @@ export function Board({
   showPoints = false,
   usedPointIds,
   onPointClick,
+  onPointHover,
   onCellClick,
   onPieceClick,
   selectedIndex = null,
   faultyIndices,
   markers,
   highlightPoints,
+  beamLines,
+  emphasizedLineId,
 }: BoardProps) {
   const w = catalog.grid_width;
   const h = catalog.grid_height;
@@ -85,6 +104,24 @@ export function Board({
   const viewH = oy * 2 + h * CELL;
   const points = showPoints ? boardPoints(w, h) : [];
   const highlightById = new Map((highlightPoints ?? []).map((p) => [p.id, p.role]));
+  const pointById = new Map(points.map((pt) => [pt.id, pt]));
+  const centerX = ox + (w * CELL) / 2;
+  const centerY = oy + (h * CELL) / 2;
+
+  function pointPos(id: string): { x: number; y: number } | null {
+    const pt = pointById.get(id);
+    if (!pt) return null;
+    const x = pt.side === "left" ? ox - 12 : pt.side === "right" ? ox + w * CELL + 12 : ox + pt.cellX * CELL + CELL / 2;
+    const y = pt.side === "top" ? oy - 12 : pt.side === "bottom" ? oy + h * CELL + 12 : oy + pt.cellY * CELL + CELL / 2;
+    return { x, y };
+  }
+
+  // L'onde émphasisée se dessine en dernier (par-dessus les autres).
+  const orderedLines = (beamLines ?? []).slice().sort((a, b) => {
+    if (a.id === emphasizedLineId) return 1;
+    if (b.id === emphasizedLineId) return -1;
+    return 0;
+  });
 
   return (
     <svg
@@ -180,19 +217,71 @@ export function Board({
         );
       })}
 
+      {/* Trajets des ondes déjà tirées : ligne directe entrée -> sortie,
+          couleur du résultat final, pour ne pas avoir à consulter
+          l'historique. Émphasisée (survol/clic) = plus épaisse, par-dessus. */}
+      {orderedLines.map((line) => {
+        const from = pointPos(line.fromId);
+        if (!from) return null;
+        const emphasized = line.id === emphasizedLineId;
+        if (line.kind === "exit" && line.toId && line.toId !== line.fromId) {
+          const to = pointPos(line.toId);
+          if (!to) return null;
+          return (
+            <line
+              key={line.id}
+              x1={from.x}
+              y1={from.y}
+              x2={to.x}
+              y2={to.y}
+              stroke={line.color}
+              strokeWidth={emphasized ? 4 : 2.25}
+              strokeOpacity={emphasized ? 1 : 0.6}
+              strokeLinecap="round"
+              className="beam-line"
+            />
+          );
+        }
+        // Absorbée / perdue, ou rebond immédiat (le point de sortie est le
+        // point d'entrée lui-même, donc une "ligne" entre les deux serait
+        // invisible) : petit segment vers le centre de la grille pour
+        // indiquer "entrée sans en ressortir ailleurs".
+        const dx = centerX - from.x;
+        const dy = centerY - from.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const stubLen = 22;
+        const stubX = from.x + (dx / len) * stubLen;
+        const stubY = from.y + (dy / len) * stubLen;
+        return (
+          <line
+            key={line.id}
+            x1={from.x}
+            y1={from.y}
+            x2={stubX}
+            y2={stubY}
+            stroke={line.color}
+            strokeWidth={emphasized ? 4 : 2.25}
+            strokeOpacity={emphasized ? 1 : 0.6}
+            strokeLinecap="round"
+            strokeDasharray={line.kind === "lost" ? "3 3" : undefined}
+            className="beam-line"
+          />
+        );
+      })}
+
       {/* Points de tir */}
       {points.map((pt) => {
-        const px =
-          pt.side === "left" ? ox - 12 : pt.side === "right" ? ox + w * CELL + 12 : ox + pt.cellX * CELL + CELL / 2;
-        const py =
-          pt.side === "top" ? oy - 12 : pt.side === "bottom" ? oy + h * CELL + 12 : oy + pt.cellY * CELL + CELL / 2;
+        const { x: px, y: py } = pointPos(pt.id)!;
         const used = usedPointIds?.has(pt.id);
         const role = highlightById.get(pt.id);
+        const emphasized = beamLines?.some((l) => l.id === emphasizedLineId && l.fromId === pt.id);
         return (
           <g
             key={pt.id}
-            className={`board-point${used ? " board-point-used" : ""}${role ? ` board-point-${role}` : ""}`}
+            className={`board-point${used ? " board-point-used" : ""}${role ? ` board-point-${role}` : ""}${emphasized ? " board-point-emphasized" : ""}`}
             onClick={onPointClick ? () => onPointClick(pt.id) : undefined}
+            onMouseEnter={onPointHover ? () => onPointHover(pt.id) : undefined}
+            onMouseLeave={onPointHover ? () => onPointHover(null) : undefined}
             style={onPointClick ? { cursor: "pointer" } : undefined}
           >
             <circle cx={px} cy={py} r={9} />
