@@ -83,10 +83,27 @@ pub enum Side {
 }
 
 /// Contenu d'une case du plateau.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum CellKind {
     Square,
     Triangle(Corner),
+}
+
+// Sérialisation manuelle (plutôt que dérivée) pour produire les mêmes
+// chaînes plates ("square", "tri_nw", ...) que `as_str`/`parse`, utilisées
+// à la fois par `data/pieces.json` et par le JSON envoyé au client (voir
+// `orapa-wasm`) — une seule convention de nommage des cases côté JSON.
+impl Serialize for CellKind {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+impl<'de> Deserialize<'de> for CellKind {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let s = String::deserialize(deserializer)?;
+        CellKind::parse(&s).ok_or_else(|| serde::de::Error::custom(format!("kind inconnu: {s}")))
+    }
 }
 
 impl CellKind {
