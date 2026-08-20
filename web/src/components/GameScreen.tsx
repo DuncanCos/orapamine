@@ -154,7 +154,12 @@ export function GameScreen({ catalog }: GameScreenProps) {
         </span>
       </div>
 
-      <section className="game-board-section">
+      <div className="opponent-board-row">
+        <aside className="opponent-board-side opponent-board-side-left">
+          <ColorLegend />
+        </aside>
+
+      <section className="game-board-section opponent-board-main">
         <h3>{isSolo ? "Grille adverse" : playerNames[opponentIndex ?? 1] ?? "Adversaire"}</h3>
         {isYourTurn && (
           <div className="action-mode-select">
@@ -194,6 +199,12 @@ export function GameScreen({ catalog }: GameScreenProps) {
         )}
       </section>
 
+        <aside className="opponent-board-side opponent-board-side-right">
+          <HistoryPanel history={history} yourIndex={yourIndex ?? 0} playerNames={playerNames} onHoverEntry={setHoveredEntry} />
+        </aside>
+      </div>
+
+      <div className="own-boards-row">
       <section className="game-board-section game-board-own">
         <h3>{t("result.boards.yours")}</h3>
         <Board catalog={catalog} placements={ownPlacement} markers={yourMarkers} />
@@ -230,9 +241,7 @@ export function GameScreen({ catalog }: GameScreenProps) {
           </p>
         )}
       </section>
-
-      <HistoryPanel history={history} yourIndex={yourIndex ?? 0} playerNames={playerNames} onHoverEntry={setHoveredEntry} />
-      <ColorLegend />
+      </div>
 
       {!isSolo && (
         <div className="reactions-bar">

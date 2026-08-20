@@ -23,7 +23,7 @@ const ROWS: { colors: string; result: ResultColor }[] = [
 
 export function ColorLegend() {
   return (
-    <details className="color-legend">
+    <details className="color-legend" open>
       <summary>{t("game.legend.title")}</summary>
       <table>
         <tbody>

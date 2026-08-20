@@ -79,7 +79,7 @@ h3 {
 }
 
 .app-shell {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 16px;
   display: flex;
@@ -456,6 +456,55 @@ legend {
   box-shadow: var(--shadow-offset) var(--shadow-offset) 0 0 var(--border);
   padding: 16px;
   margin-bottom: 16px;
+}
+
+.opponent-board-row {
+  display: flex;
+  flex-direction: column;
+}
+.opponent-board-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.opponent-board-side {
+  flex: 0 0 280px;
+}
+.opponent-board-side .history-panel,
+.opponent-board-side .color-legend {
+  margin-bottom: 16px;
+}
+
+.own-boards-row {
+  display: flex;
+  flex-direction: column;
+}
+.own-boards-row .game-board-own,
+.own-boards-row .hypothesis-section {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .opponent-board-row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .opponent-board-side {
+    display: flex;
+    flex-direction: column;
+  }
+  .opponent-board-side .history-panel,
+  .opponent-board-side .color-legend {
+    flex: 1 1 auto;
+    max-height: none;
+    margin-bottom: 0;
+  }
+  .own-boards-row {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+  }
 }
 .action-mode-select {
   display: flex;
