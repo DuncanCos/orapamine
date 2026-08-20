@@ -134,7 +134,7 @@ impl fmt::Display for CellKind {
 
 /// Une case (position relative dans la forme d'une pièce, ou absolue sur le
 /// plateau) et son contenu.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Cell {
     pub x: i32,
     pub y: i32,

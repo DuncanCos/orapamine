@@ -11,3 +11,13 @@ orapa-core = { path = "../orapa-core" }
 wasm-bindgen = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[dev-dependencies]
+rand = { version = "0.8", features = ["small_rng"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# orapa-core dépend de `rand` (générateur de placement, utilisé côté
+# serveur) ; sur wasm32-unknown-unknown, `getrandom` a besoin de la
+# feature "js" pour trouver une source d'aléa (Web Crypto) même si ce
+# crate wasm n'appelle lui-même aucune fonction aléatoire.
+getrandom = { version = "0.2", features = ["js"] }

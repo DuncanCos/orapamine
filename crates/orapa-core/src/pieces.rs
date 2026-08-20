@@ -76,7 +76,7 @@ struct RawCatalog {
 /// Définition complète d'une pièce : identité + toutes ses orientations
 /// valides (dédupliquées), chacune sous forme de liste de cases relatives
 /// normalisées (min x = 0, min y = 0).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PieceDef {
     pub id: String,
     pub label_fr: String,
@@ -104,7 +104,7 @@ impl PieceDef {
 
 /// Catalogue complet des pièces + dimensions de grille, tel que défini dans
 /// `data/pieces.json`.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct PieceCatalog {
     pub grid_width: i32,
     pub grid_height: i32,
