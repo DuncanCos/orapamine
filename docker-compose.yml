@@ -1,0 +1,8 @@
+services:
+  orapamine:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
