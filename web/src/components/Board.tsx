@@ -1,7 +1,8 @@
 import { forwardRef } from "react";
 import { boardPoints } from "../lib/points";
-import { GEM_COLORS, SPECIAL_COLORS } from "../lib/colors";
-import type { CellKind, GemColor, PieceCatalog, PlacedPiece } from "../types/protocol";
+import { GEM_COLORS, RESULT_MIX, SPECIAL_COLORS } from "../lib/colors";
+import { mixExplanation } from "../lib/mixExplain";
+import type { CellKind, GemColor, PieceCatalog, PlacedPiece, ResultColor } from "../types/protocol";
 
 export const CELL = 34;
 export const MARGIN = 26;
@@ -87,6 +88,10 @@ export interface BeamLine {
   toId: string | null;
   color: string;
   kind: "exit" | "absorbed" | "lost";
+  /** Couleur de résultat "logique" (pour une sortie) — sert à retrouver la
+   * décomposition en gemmes (`RESULT_MIX`) pour l'infobulle et le badge de
+   * mélange, sans redupliquer la palette hex -> clé. */
+  resultKey?: ResultColor;
 }
 
 /** Aperçu translucide d'une pièce en cours de pose/déplacement, affiché
@@ -365,19 +370,56 @@ export const Board = forwardRef<SVGSVGElement, BoardProps>(function Board(
         const pts = beamPathPoints(line.fromId, line.toId);
         if (!pts) return null;
         const emphasized = line.id === emphasizedLineId;
+        const mix = line.kind === "exit" && line.resultKey ? RESULT_MIX[line.resultKey] : null;
+        const exitPos = line.toId ? pointPos(line.toId) : null;
+        const exitDir = line.toId ? edgePosAndDir(line.toId) : null;
         return (
-          <polyline
-            key={line.id}
-            points={pts}
-            fill="none"
-            stroke={line.color}
-            strokeWidth={emphasized ? 4 : 2.25}
-            strokeOpacity={emphasized ? 1 : 0.6}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeDasharray={line.kind === "lost" ? "3 3" : undefined}
-            className="beam-line"
-          />
+          <g key={line.id}>
+            <polyline
+              points={pts}
+              fill="none"
+              stroke={line.color}
+              strokeWidth={emphasized ? 4 : 2.25}
+              strokeOpacity={emphasized ? 1 : 0.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray={line.kind === "lost" ? "3 3" : undefined}
+              className="beam-line"
+            >
+              {line.resultKey && <title>{mixExplanation(line.resultKey)}</title>}
+            </polyline>
+            {/* Badge de mélange : petites pastilles des gemmes traversées,
+                collées au point de sortie, pour donner d'emblée "de quoi"
+                cette couleur est faite sans avoir à rouvrir la légende.
+                Décalées vers l'intérieur de la grille (jamais "vers
+                l'extérieur") pour ne jamais sortir du viewBox, quel que soit
+                le bord d'où sort l'onde. */}
+            {mix && mix.length > 0 && exitPos && exitDir && (
+              <g className={`beam-mix-badge${emphasized ? " beam-mix-badge-emphasized" : ""}`} style={{ pointerEvents: "none" }}>
+                {mix.map((gem, i) => {
+                  const offset = 15;
+                  const spread = (i - (mix.length - 1) / 2) * 8;
+                  // Perpendiculaire à la direction "vers l'intérieur" : sert
+                  // à aligner les pastilles le long du bord plutôt que de les
+                  // empiler, quelle que soit l'orientation (haut/bas -> ligne
+                  // horizontale de pastilles, gauche/droite -> verticale).
+                  const perpX = exitDir.dy;
+                  const perpY = -exitDir.dx;
+                  return (
+                    <circle
+                      key={gem}
+                      cx={exitPos.x + exitDir.dx * offset + perpX * spread}
+                      cy={exitPos.y + exitDir.dy * offset + perpY * spread}
+                      r={3.5}
+                      fill={GEM_COLORS[gem]}
+                      stroke="#1a1712"
+                      strokeWidth={0.75}
+                    />
+                  );
+                })}
+              </g>
+            )}
+          </g>
         );
       })}
 
@@ -387,6 +429,7 @@ export const Board = forwardRef<SVGSVGElement, BoardProps>(function Board(
         const used = usedPointIds?.has(pt.id);
         const role = highlightById.get(pt.id);
         const emphasized = beamLines?.some((l) => l.id === emphasizedLineId && l.fromId === pt.id);
+        const matchingLine = beamLines?.find((l) => l.fromId === pt.id || l.toId === pt.id);
         return (
           <g
             key={pt.id}
@@ -396,6 +439,7 @@ export const Board = forwardRef<SVGSVGElement, BoardProps>(function Board(
             onMouseLeave={onPointHover ? () => onPointHover(null) : undefined}
             style={onPointClick ? { cursor: "pointer" } : undefined}
           >
+            {matchingLine?.resultKey && <title>{mixExplanation(matchingLine.resultKey)}</title>}
             <circle cx={px} cy={py} r={9} />
             <text x={px} y={py} dy="0.32em" textAnchor="middle">
               {pt.id}

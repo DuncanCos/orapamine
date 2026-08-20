@@ -1,4 +1,5 @@
 import { RESULT_COLORS } from "../lib/colors";
+import { mixExplanation } from "../lib/mixExplain";
 import type { ResultColor } from "../types/protocol";
 import { t } from "../i18n/fr";
 
@@ -21,14 +22,25 @@ const ROWS: { colors: string; result: ResultColor }[] = [
   { colors: `Rouge + Bleu + Jaune + Blanc`, result: "gray" },
 ];
 
-export function ColorLegend() {
+interface ColorLegendProps {
+  /** Résultat actuellement survolé/épinglé sur le plateau — met en évidence
+   * la ligne correspondante pour relier immédiatement une onde tirée à ce
+   * qu'elle implique, sans avoir à recomparer la couleur "à l'œil". */
+  highlightedResult?: ResultColor | null;
+}
+
+export function ColorLegend({ highlightedResult }: ColorLegendProps) {
   return (
     <details className="color-legend" open>
       <summary>{t("game.legend.title")}</summary>
       <table>
         <tbody>
           {ROWS.map((row) => (
-            <tr key={row.result}>
+            <tr
+              key={row.result}
+              className={row.result === highlightedResult ? "legend-row-highlight" : undefined}
+              title={mixExplanation(row.result)}
+            >
               <td>{row.colors}</td>
               <td>
                 <span className="legend-swatch" style={{ background: RESULT_COLORS[row.result] }} />

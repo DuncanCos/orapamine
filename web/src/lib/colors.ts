@@ -32,3 +32,25 @@ export const SPECIAL_COLORS = {
   absorb: "#171513",
   transparent: "#cfeaf0",
 };
+
+// Décomposition de chaque couleur de résultat en gemmes traversées — inverse
+// de `mix_colors` (crates/orapa-core/src/colors.rs) — pour pouvoir expliquer
+// un résultat ("Violet" -> Rouge + Bleu) sans le redériver côté client.
+export const RESULT_MIX: Record<ResultColor, GemColor[]> = {
+  transparent: [],
+  red: ["red"],
+  blue: ["blue"],
+  yellow: ["yellow"],
+  white: ["white"],
+  purple: ["red", "blue"],
+  orange: ["red", "yellow"],
+  green: ["blue", "yellow"],
+  pink: ["red", "white"],
+  sky_blue: ["blue", "white"],
+  lemon: ["yellow", "white"],
+  black: ["red", "blue", "yellow"],
+  light_purple: ["red", "blue", "white"],
+  light_green: ["blue", "yellow", "white"],
+  light_orange: ["red", "yellow", "white"],
+  gray: ["red", "blue", "yellow", "white"],
+};

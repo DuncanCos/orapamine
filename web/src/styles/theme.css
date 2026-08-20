@@ -351,8 +351,15 @@ legend {
   stroke-width: 3;
 }
 .beam-line {
-  pointer-events: none;
+  pointer-events: stroke;
+  cursor: help;
   transition: stroke-width 80ms steps(1), stroke-opacity 80ms steps(1);
+}
+.beam-mix-badge circle {
+  opacity: 0.75;
+}
+.beam-mix-badge-emphasized circle {
+  opacity: 1;
 }
 .beam-hint {
   margin-top: 4px;
@@ -586,6 +593,14 @@ legend {
   border: 1.5px solid var(--border);
   margin-right: 6px;
   vertical-align: middle;
+}
+.color-legend tr {
+  cursor: help;
+}
+.legend-row-highlight {
+  background: var(--paper-dim);
+  outline: 2px solid var(--ink);
+  outline-offset: -1px;
 }
 
 .reactions-bar {

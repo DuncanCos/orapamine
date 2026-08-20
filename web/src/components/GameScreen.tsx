@@ -88,7 +88,14 @@ export function GameScreen({ catalog }: GameScreenProps) {
     .filter((h): h is HistoryEntry & { kind: "Beam" } => h.kind === "Beam")
     .map((h) => {
       if (h.outcome.kind === "Exit") {
-        return { id: h.entry, fromId: h.entry, toId: h.outcome.point, color: RESULT_COLORS[h.outcome.color], kind: "exit" as const };
+        return {
+          id: h.entry,
+          fromId: h.entry,
+          toId: h.outcome.point,
+          color: RESULT_COLORS[h.outcome.color],
+          kind: "exit" as const,
+          resultKey: h.outcome.color,
+        };
       }
       if (h.outcome.kind === "Absorbed") {
         return { id: h.entry, fromId: h.entry, toId: null, color: SPECIAL_COLORS.absorb, kind: "absorbed" as const };
@@ -100,6 +107,10 @@ export function GameScreen({ catalog }: GameScreenProps) {
   // tactile, où il n'y a pas de survol).
   const hoveredBeamEntry = hoveredEntry?.kind === "Beam" && hoveredEntry.actor === yourIndex ? hoveredEntry.entry : null;
   const emphasizedLineId = hoveredPointId ?? hoveredBeamEntry ?? selectedPointId;
+  // Relie la ligne (ou le point) survolée/épinglée à sa ligne dans la
+  // légende, pour qu'on voie tout de suite "ce que ça implique" sans avoir
+  // à comparer la teinte à l'œil.
+  const emphasizedResult = beamLines.find((l) => l.id === emphasizedLineId)?.resultKey ?? null;
 
   function handlePointClick(id: string) {
     if (usedPointIds.has(id)) {
@@ -156,7 +167,7 @@ export function GameScreen({ catalog }: GameScreenProps) {
 
       <div className="opponent-board-row">
         <aside className="opponent-board-side opponent-board-side-left">
-          <ColorLegend />
+          <ColorLegend highlightedResult={emphasizedResult} />
         </aside>
 
       <section className="game-board-section opponent-board-main">
