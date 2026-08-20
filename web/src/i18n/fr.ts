@@ -134,6 +134,11 @@ const fr = {
   "rules.end.title": "Fin de partie",
   "rules.end.body":
     "Une proposition juste gagne la partie immédiatement — sauf si tu es le premier joueur du tour à trouver : ton adversaire a alors droit à un dernier tour pour égaliser (mort subite). En mode solo, entraîne-toi à déduire une disposition tirée au hasard, sans adversaire.",
+
+  "rules.diagram.corner_ok": "Coin-à-coin : autorisé",
+  "rules.diagram.edge_bad": "Arête-à-arête : interdit",
+  "rules.diagram.bounce": "Face droite → demi-tour",
+  "rules.diagram.deflect": "Hypoténuse → déviation à 90°",
 } as const;
 
 export type TranslationKey = keyof typeof fr;

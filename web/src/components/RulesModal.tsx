@@ -1,4 +1,5 @@
 import { ColorLegend } from "./ColorLegend";
+import { PlacementDiagram, BeamDiagram, MixDiagram } from "./RuleDiagrams";
 import { t } from "../i18n/fr";
 
 export function RulesModal({ onClose }: { onClose: () => void }) {
@@ -20,6 +21,7 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
         <section>
           <h3>{t("rules.setup.title")}</h3>
           <p>{t("rules.setup.body")}</p>
+          <PlacementDiagram />
         </section>
 
         <section>
@@ -32,6 +34,8 @@ export function RulesModal({ onClose }: { onClose: () => void }) {
         <section>
           <h3>{t("rules.beam.title")}</h3>
           <p>{t("rules.beam.body")}</p>
+          <BeamDiagram />
+          <MixDiagram />
           <ColorLegend />
         </section>
 

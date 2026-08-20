@@ -620,6 +620,39 @@ legend {
   margin-top: 8px;
 }
 
+.rules-diagram {
+  margin: 10px 0;
+}
+.rules-diagram-pair {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.rules-diagram figure {
+  margin: 0;
+  text-align: center;
+}
+.rules-diagram-svg {
+  width: 140px;
+  height: auto;
+  display: block;
+  background: var(--paper);
+  border: 2px solid var(--border);
+}
+.rules-diagram-wide {
+  width: 220px;
+}
+.rules-diagram figcaption {
+  font-size: 0.75rem;
+  margin-top: 4px;
+  color: #6b6355;
+}
+.rules-diagram-plus {
+  font-family: var(--font-display);
+  font-size: 14px;
+  fill: var(--ink);
+}
+
 /* --- Responsive --- */
 
 @media (max-width: 600px) {
