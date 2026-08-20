@@ -497,8 +497,12 @@ legend {
   .opponent-board-side .history-panel,
   .opponent-board-side .color-legend {
     flex: 1 1 auto;
-    max-height: none;
+    max-height: 70vh;
+    min-height: 0;
     margin-bottom: 0;
+  }
+  .opponent-board-side .history-panel {
+    overflow-y: auto;
   }
   .own-boards-row {
     flex-direction: row;
